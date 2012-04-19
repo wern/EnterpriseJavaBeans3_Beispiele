@@ -1,0 +1,20 @@
+<project name="embedded" default="jar" basedir="..">
+
+    <property name="jboss.embedded.home" value="C:\Programme\jboss-EJB-3.0_Embeddable_ALPHA_9"/>
+	<property name="package.dir" value="embedded"/>
+	<property name="ejb.jar" value="embedded.jar"/>
+	<property name="main.class" value="embedded.Client"/>
+
+	<import file="../../common.build.xml" />
+
+	<!-- hier wird ein eigener Klassenpfad benoetigt, da wir die JBoss 5 libs benoetigen-->
+	<path id="classpath">
+		<pathelement location="${examples.root}/embedded.jar"/>
+		<pathelement location="${jboss.embedded.home}/lib/hibernate-all.jar"/>
+		<pathelement location="${jboss.embedded.home}/lib/jboss-ejb3-all.jar"/>
+		<pathelement location="${jboss.embedded.home}/lib/jcainflow.jar"/>
+		<pathelement location="${jboss.embedded.home}/lib/thirdparty-all.jar"/>
+		<pathelement location="${jboss.embedded.home}/conf"/>
+	</path>
+
+</project>

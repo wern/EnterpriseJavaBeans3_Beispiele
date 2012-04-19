@@ -1,0 +1,87 @@
+<project name="common-build">
+  <description>
+    Allgemeine Build-Regeln, die in allen Beispielen gemeinsam genutzt werden.
+  </description>
+
+   <property name="jboss.home" value="C:/Programme/jboss-4.0.5.GA"/>
+   <property name="jboss.deploy" value="${jboss.home}/server/default/deploy"/>
+   <property name="jboss.conf" value="${jboss.home}/server/default/conf"/>
+   <property name="examples.root" value="${basedir}/.."/>
+   <property name="classes.dir" value="${examples.root}/classes"/>
+   <property name="jar.dir" value="${examples.root}"/>
+   <property name="full.ejb.jar" value="${jar.dir}/${ejb.jar}"/>
+   <property name="main.args" value=""/>
+   <property name="metainf.dir" value="${basedir}/${package.dir}"/>
+
+   <path id="classpath">
+      <pathelement location="${examples.root}"/>
+      <pathelement location="${classes.dir}"/>
+      <pathelement location="${jboss.home}/client/jboss-ejb3x.jar"/>
+      <pathelement location="${jboss.home}/client/jbossall-client.jar"/>
+      <pathelement location="${jboss.home}/client/jboss-ejb3-client.jar"/>
+      <pathelement location="${jboss.home}/client/ejb3-persistence.jar"/>
+      <pathelement location="${jboss.home}/client/jboss-aop-jdk50-client.jar"/>
+      <pathelement location="${jboss.home}/client/jboss-aspect-jdk50-client.jar"/>
+<!-- Die folgende Zeile bezieht alle Bibliotheken der JBoss-Installtion
+     in den Classpath ein. Das ist u.U. hilfreich, um in Exception-Faellen
+     genauere Informationen auf Client-Seite zu erhalten.
+
+      <fileset dir="${jboss.home}">
+         <include name="**/*.jar"/>
+      </fileset>
+-->
+   </path>
+
+   <path id="classpath_webservice">
+      <pathelement location="${examples.root}"/>
+      <pathelement location="${classes.dir}"/>
+      <pathelement location="${jboss.home}/server/default/deploy/jbossws.sar/jboss-jaxws.jar"/>
+   </path>
+
+   <target name="prepare">
+      <mkdir dir="${classes.dir}"/>
+      <mkdir dir="${jar.dir}"/>
+   </target>
+
+   <target name="compile" depends="prepare" description="Compiliert die Quellen">
+      <javac srcdir="${basedir}" destdir="${classes.dir}"
+         debug="on"
+         includes="${package.dir}/**">
+         <classpath><path refid="classpath" /> <path refid="classpath_webservice"/></classpath>
+      </javac>
+   </target>
+
+   <target name="jar" depends="compile" description="Baut das EJB-Jar">
+      <jar jarfile="${full.ejb.jar}">
+         <fileset dir="${classes.dir}">
+            <include name="${package.dir}/**/*.class"/>
+         </fileset>
+         <fileset dir="${metainf.dir}">
+            <include name="META-INF/**"/>
+         </fileset>
+      </jar>
+   </target>
+
+   <target name="deploy" depends="jar"
+           description="Deployed das EJB-Jar durch Copy Deployment im Server">
+      <copy file="${full.ejb.jar}" todir="${jboss.deploy}"/>
+   </target>
+
+   <target name="undeploy"
+           description="Undeployment durch Entfernen des EJB-Jars aus dem Server">
+      <delete file="${jboss.deploy}/${ejb.jar}"/>
+   </target>
+
+   <target name="run" depends="jar" description="Ruft das Client-Programm auf">
+      <java classname="${main.class}" fork="yes" dir="${package.dir}">
+      	 <arg line="${main.args}"/>
+         <classpath refid="classpath"/>
+      </java>
+   </target>
+
+   <target name="clean" description="Loescht alle generierte Dateien">
+      <delete file="${full.ejb.jar}"/>
+   	  <delete dir="${classes.dir}/${package.dir}" />
+   </target>
+
+</project>
